@@ -1,0 +1,137 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:models="clr-namespace:SRChat.Client.Models"
+             xmlns:vm="clr-namespace:SRChat.Client.ViewModels"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit" 
+             x:DataType="vm:MessageViewModel"
+             IconImageSource="chat.png"
+             x:Class="SRChat.Client.MainPage">
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <Style TargetType="Button">
+                <Setter Property="FontFamily" Value="{OnPlatform WinUI=OpenSansRegular,Default=FontAwesome}"/>
+                <Setter Property="CornerRadius" Value="{OnPlatform WinUI=20,Default=60}"/>
+                <Setter Property="FontSize" Value="{OnPlatform WinUI=16,Default=22}"/>
+                <Setter Property="Padding" Value="{OnPlatform WinUI='13,10', Default='14,13'}"/>
+            </Style>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+    <ContentPage.Behaviors>
+        <toolkit:EventToCommandBehavior EventName="Disappearing" Command="{Binding DisconnectCommand}"/>
+    </ContentPage.Behaviors>
+    <ContentPage.BindingContext>
+        <vm:MessageViewModel/>
+    </ContentPage.BindingContext>
+    <Grid 
+    RowDefinitions="auto,auto,*,auto" 
+    RowSpacing="10" 
+    Margin="15">
+        <HorizontalStackLayout Spacing="10" FlowDirection="LeftToRight">
+            <Image Source="chating.png" WidthRequest="40" HeightRequest="40" />
+            <Label Text="SR Chat" CharacterSpacing="5" FontAttributes="Bold" FontAutoScalingEnabled="True" FontSize="Title"/>
+        </HorizontalStackLayout>
+        <Grid 
+        Grid.Row="1"
+        ColumnSpacing="10" 
+        ColumnDefinitions="*,auto,auto">
+            <Entry 
+            Text="{Binding Sender,Mode=TwoWay}"
+            IsEnabled="{Binding IsDisconnected,Mode=OneWay}"
+            Placeholder="User Name"/>
+            <Button 
+            Command="{Binding ConnectCommand}"
+            IsEnabled="{Binding IsDisconnected,Mode=OneWay}"
+            Grid.Column="1"
+            Text="{OnPlatform WinUI=Connect,Default=&#xf090;}"/>
+            <Button 
+            IsEnabled="{Binding IsConnected}"
+            Command="{Binding DisconnectCommand,Mode=OneWay}"
+            Grid.Column="2"
+            Rotation="{OnPlatform WinUI=0,Default=180}"
+            Text="{OnPlatform WinUI=Disconnect,Default=&#xf08b;}"/>
+        </Grid>
+        <CollectionView 
+        x:Name="cvMessages" 
+        Grid.Row="2" 
+        ItemsUpdatingScrollMode="KeepLastItemInView" 
+        x:DataType="vm:MessageViewModel" 
+        ItemsSource="{Binding Messages}">
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:Message" >
+                    <Grid 
+                    ColumnDefinitions="auto,*" 
+                    RowDefinitions="*,auto" 
+                    FlowDirection="{Binding FlowDirection}" 
+                    ColumnSpacing="5" 
+                    Margin="5" 
+                    Padding="5">
+                        <Image 
+                        x:Name="image" 
+                        WidthRequest="50" 
+                        HeightRequest="50" 
+                        Source="{Binding Image,TargetNullValue=chating.png}" 
+                        VerticalOptions="Start">
+                            <Image.Clip>
+                                <EllipseGeometry Center="25,25" RadiusX="25" RadiusY="25" />
+                            </Image.Clip>
+                            <Image.Shadow>
+                                <Shadow Brush="Gray" Radius="10" Opacity="0.3"  />
+                            </Image.Shadow>
+                        </Image>
+                        <ActivityIndicator IsRunning="{Binding Source={x:Reference image},Path=IsLoading}">
+
+                        </ActivityIndicator>
+                        <Label 
+                        Text="{Binding Sender}" 
+                        HorizontalOptions="Center" 
+                        Grid.Row="1" 
+                        FontSize="12"/>
+                        <Label 
+                        Text="{Binding Date}" 
+                        Grid.Row="1" 
+                        HorizontalOptions="Start" 
+                        Grid.Column="1" 
+                        FontSize="12"/>
+                        <Border 
+                        Grid.Column="1" 
+                        WidthRequest="10" 
+                        HeightRequest="10" 
+                        StrokeThickness="0" 
+                        HorizontalOptions="Start" 
+                        VerticalOptions="End" 
+                        BackgroundColor="{AppThemeBinding Dark=#5C5C5C, Light=#EBEBEB}">
+
+                        </Border>
+                        <Frame  
+                        Grid.Column="1"
+                        CornerRadius="10" 
+                        BorderColor="{AppThemeBinding Dark=#5C5C5C, Light=#EBEBEB}"
+                        HorizontalOptions="Start"
+                        Padding="5"
+                        BackgroundColor="{AppThemeBinding Dark=#5C5C5C, Light=#EBEBEB}">
+                            <Label Text="{Binding Text}" Margin="5" FontSize="16"/>
+                        </Frame>
+                    </Grid>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+        <Grid Grid.Row="3" ColumnSpacing="10" ColumnDefinitions="*,auto">
+            <Editor 
+            x:Name="txtMessage" 
+            IsEnabled="{Binding IsConnected,Mode=OneWay}"
+            AutoSize="TextChanges"
+            Grid.Column="0" 
+            Text="{Binding Message}"
+            Placeholder="Message"/>
+            <Button
+            x:Name="btnSend"
+            IsEnabled="{Binding IsSendingEnabled,Mode=OneWay}"
+            Grid.Column="1"
+            VerticalOptions="Center"
+            Command="{Binding SendCommand}"
+            Text="{OnPlatform WinUI=Send,Default=&#xf1d8;}"/>
+        </Grid>
+    </Grid>
+
+</ContentPage>
